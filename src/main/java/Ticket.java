@@ -4,7 +4,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.Duration;
-import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -14,27 +14,36 @@ import java.util.List;
 @Getter
 @Setter
 public class Ticket {
-    private LocalDateTime departure;
-    private LocalDateTime arrival;
-    //разница во времени между ТА и Владивостоком
-    private final int TIME_DIFFERENCE = 8;
-
-    private List<Ticket> tickets(){
+    private ZonedDateTime departure;
+    private ZonedDateTime arrival;
 
 
-        return new ArrayList<>();
-    }
 
+    private List<Ticket> tickets(){return new ArrayList<>();}
 
     public List<Duration> durations() {
         List<Ticket> tickets = tickets();
         List<Duration> res = new ArrayList<>();
         for (Ticket t : tickets) {
             Duration flightDuration = Duration.
-                    between(t.getDeparture().minusHours(8), t.getArrival());
+                    between(t.getDeparture(), t.getArrival());
             res.add(flightDuration);
         }
         Collections.sort(res);
         return res;
+    }
+    public Duration averageDuration(){
+        List<Duration> durations = durations();
+        List<Long> durationsInSeconds = new ArrayList<>();
+        durations.stream().forEach(d -> durationsInSeconds.add(d.getSeconds()));
+        long averageInSeconds =
+                (long)durationsInSeconds.stream().mapToLong(d -> d).average().getAsDouble();
+
+        return Duration.ofSeconds(averageInSeconds) ;
+    }
+
+    public Duration procentile90th(){
+        List<Duration> durations = durations();
+        return  durations.get((int) Math.ceil(durations.size() * 0.9));
     }
 }
