@@ -14,39 +14,26 @@ public class TicketParser {
     private static String path =
             "C:\\IdeaProjects\\FlightTimeCalculator\\src\\main\\resources\\tickets.json";
 
-    private ArrayNode ticketList() throws IOException {
-        ObjectMapper objectMapper = new ObjectMapper();
-        File from = new File(path);
-        ArrayNode tickets = (ArrayNode) objectMapper.readTree(from).get("tickets");
-        return tickets;
-    }
-
     @SneakyThrows
-    public List<Ticket> tickets() {
+    public List<Ticket> getTicketList() {
 
-        ArrayList<Ticket> res = new ArrayList<>();
-        TicketParser ticketParser = new TicketParser();
-        JsonNode ticketsNode = ticketParser.ticketList();
+        List<Ticket> res = new ArrayList<>();
+        JsonNode ticketsNode = parseTickets();
         Iterator<JsonNode> elements = ticketsNode.elements();
 
         while (elements.hasNext()) {
-            JsonNode next = elements.next();
+            JsonNode nextNode = elements.next();
 
-            String[] split = next.get("departure_date").asText().split("\\.");
-            LocalDate deptDate = LocalDate.of(Integer.parseInt(split[2]), Integer.parseInt(split[1]), Integer.parseInt(split[0]));
+            LocalDate deptDate =
+                    convertJsonNodeToDate(nextNode.get("departure_date"));
+            LocalTime deptTime =
+                    convertJsonNodeToTime(nextNode.get("departure_time"));
 
-            String[] split1 = next.get("departure_time").asText().split(":");
-            LocalTime deptTime
-                    = LocalTime.of(Integer.parseInt(split1[0]), Integer.parseInt(split1[1]));
             LocalDateTime deptDateTime = LocalDateTime.of(deptDate, deptTime);
 
-            String[] split2 = next.get("arrival_date").asText().split("\\.");
-            LocalDate arrDate =
-                    LocalDate.of(Integer.parseInt(split2[2]), Integer.parseInt(split2[1]), Integer.parseInt(split2[0]));
+            LocalDate arrDate = convertJsonNodeToDate(nextNode.get("arrival_date"));
+            LocalTime arrTime = convertJsonNodeToTime(nextNode.get("arrival_time"));
 
-            String[] split3 = next.get("arrival_time").asText().split(":");
-            LocalTime arrTime =
-                    LocalTime.of(Integer.parseInt(split3[0]), Integer.parseInt(split3[1]));
             LocalDateTime arrDateTime = LocalDateTime.of(arrDate, arrTime);
 
             Ticket t = new Ticket();
@@ -55,5 +42,21 @@ public class TicketParser {
             res.add(t);
         }
         return res;
+    }
+
+    private LocalDate convertJsonNodeToDate(JsonNode jsonNode) {
+        String[] split = jsonNode.asText().split("\\.");
+        return LocalDate.of(Integer.parseInt(split[2]), Integer.parseInt(split[1]), Integer.parseInt(split[0]));
+    }
+
+    private LocalTime convertJsonNodeToTime(JsonNode jsonNode) {
+        String[] split = jsonNode.asText().split(":");
+        return LocalTime.of(Integer.parseInt(split[0]), Integer.parseInt(split[1]));
+    }
+
+
+    private ArrayNode parseTickets() throws IOException {
+
+        return (ArrayNode) new ObjectMapper().readTree(new File(path)).get("tickets");
     }
 }

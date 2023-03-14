@@ -15,7 +15,7 @@ public class TicketStatistics {
     @SneakyThrows
     private List<Duration> durations() {
         TicketParser parser = new TicketParser();
-        List<Ticket> tickets = parser.tickets();
+        List<Ticket> tickets = parser.getTicketList();
         List<Duration> res = new ArrayList<>();
         for (Ticket t : tickets) {
             Duration flightDuration = Duration.
