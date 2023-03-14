@@ -7,31 +7,30 @@ import java.io.File;
 import java.io.IOException;
 import java.time.*;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 public class TicketParser {
-    private static   String path =
+    private static String path =
             "C:\\IdeaProjects\\FlightTimeCalculator\\src\\main\\resources\\tickets.json";
 
-   private ArrayNode ticketList() throws IOException {
+    private ArrayNode ticketList() throws IOException {
         ObjectMapper objectMapper = new ObjectMapper();
         File from = new File(path);
-       ArrayNode tickets = (ArrayNode)objectMapper.readTree(from).get("tickets");
-       return   tickets;
+        ArrayNode tickets = (ArrayNode) objectMapper.readTree(from).get("tickets");
+        return tickets;
     }
 
     @SneakyThrows
-    public List<Ticket> tickets()  {
-        List<Ticket> res = new ArrayList<>();
+    public List<Ticket> tickets() {
+
+        ArrayList<Ticket> res = new ArrayList<>();
         TicketParser ticketParser = new TicketParser();
         JsonNode ticketsNode = ticketParser.ticketList();
-        ZonedDateTime dept;
-        ZonedDateTime arrv;
-        String timeZoneId = "";
+        Iterator<JsonNode> elements = ticketsNode.elements();
 
-        while(ticketsNode.iterator().hasNext()) {
-
-            JsonNode next = ticketsNode.iterator().next();
+        while (elements.hasNext()) {
+            JsonNode next = elements.next();
 
             String[] split = next.get("departure_date").asText().split("\\.");
             LocalDate deptDate = LocalDate.of(Integer.parseInt(split[2]), Integer.parseInt(split[1]), Integer.parseInt(split[0]));
