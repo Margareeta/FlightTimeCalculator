@@ -1,18 +1,10 @@
-import lombok.SneakyThrows;
-
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
 public class TicketStatistics {
-    private  final List<Duration> durations;
 
-    public TicketStatistics() {
-        durations = durations();
-    }
-
-    @SneakyThrows
     private List<Duration> durations() {
         TicketParser parser = new TicketParser();
         List<Ticket> tickets = parser.getTicketList();
@@ -26,18 +18,20 @@ public class TicketStatistics {
         return res;
     }
 
-    @SneakyThrows
-    public Duration averageDuration()  {
-        List<Long> durationsInSeconds = new ArrayList<>();
-        durations.stream().forEach(d -> durationsInSeconds.add(d.getSeconds()));
+    public Duration averageDuration() {
+
         long averageInSeconds =
-                (long) durationsInSeconds.stream().mapToLong(d -> d).average().getAsDouble();
+                (long) durations().stream().mapToLong(d -> d.getSeconds()).average().getAsDouble();
 
         return Duration.ofSeconds(averageInSeconds);
     }
 
-    @SneakyThrows
-    public Duration procentile90th()  {
-        return durations.get((int) Math.ceil(durations.size() * 0.9));
+
+    public Duration procentile90th() {
+        int index = (int) (durations().size() * 0.9);
+        if (index > 0) {
+            index--;
+        }
+        return durations().get(index);
     }
 }
